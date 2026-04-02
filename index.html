@@ -660,40 +660,30 @@
         return;
       }
 
-      const nameParts = name.split(' ');
-      const firstName = nameParts[0] || '';
+      const firstName = name.split(' ')[0] || '';
 
-      // Use XMLHttpRequest to submit to Mailchimp
-      const formData = new FormData();
-      formData.append('EMAIL', email);
-      formData.append('FNAME', firstName);
-      formData.append('b_bc16519fb13bc83e6496eb6ec_593f355d7d', '');
-
-      const url = 'https://events.us3.list-manage.com/subscribe/post-json?u=bc16519fb13bc83e6496eb6ec&id=593f355d7d&f_id=007d25e1f0&c=mailchimpCallback';
-      
-      // JSONP approach — the only cross-origin method that works from static HTML
-      window.mailchimpCallback = function(data) {
-        // cleanup
-        const script = document.getElementById('mc-jsonp');
-        if (script) script.remove();
-      };
-
+      // Open Mailchimp signup in new tab with fields pre-filled
+      const base = 'https://events.us3.list-manage.com/subscribe/post?u=bc16519fb13bc83e6496eb6ec&id=593f355d7d&f_id=007d25e1f0';
       const params = new URLSearchParams({
         EMAIL: email,
         FNAME: firstName,
-        'b_bc16519fb13bc83e6496eb6ec_593f355d7d': '',
-        c: 'mailchimpCallback'
+        'b_bc16519fb13bc83e6496eb6ec_593f355d7d': ''
       });
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = base;
+      form.target = '_blank';
+      form.style.display = 'none';
+      [['EMAIL', email], ['FNAME', firstName], ['b_bc16519fb13bc83e6496eb6ec_593f355d7d', '']].forEach(([k, v]) => {
+        const inp = document.createElement('input');
+        inp.name = k; inp.value = v;
+        form.appendChild(inp);
+      });
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
 
-      const script = document.createElement('script');
-      script.id = 'mc-jsonp';
-      script.src = 'https://events.us3.list-manage.com/subscribe/post-json?u=bc16519fb13bc83e6496eb6ec&id=593f355d7d&f_id=007d25e1f0&' + params.toString() + '&c=mailchimpCallback';
-      document.body.appendChild(script);
-
-      // Show success screen
-      setTimeout(function() {
-        document.getElementById('popupForm').style.display = 'none';
-        const success = document.getElementById('popupSuccess');
-        success.style.display = 'flex';
-      }, 500);
+      // Show success screen right away
+      document.getElementById('popupForm').style.display = 'none';
+      document.getElementById('popupSuccess').style.display = 'flex';
     
