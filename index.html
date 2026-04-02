@@ -518,6 +518,7 @@
       <div class="popup-form" id="popupForm">
         <input type="text" id="inputName" placeholder="Your first name" autocomplete="given-name" />
         <input type="email" id="inputEmail" placeholder="Your email address" autocomplete="email" />
+        <input type="tel" id="inputPhone" placeholder="Your mobile number (optional)" autocomplete="tel" />
         <button type="button" onclick="handleSignup()">Notify Me 🥤</button>
       </div>
 
@@ -674,7 +675,8 @@
       form.action = base;
       form.target = '_blank';
       form.style.display = 'none';
-      [['EMAIL', email], ['FNAME', firstName], ['b_bc16519fb13bc83e6496eb6ec_593f355d7d', '']].forEach(([k, v]) => {
+      const phone = document.getElementById('inputPhone').value.trim();
+      [['EMAIL', email], ['FNAME', firstName], ['PHONE', phone], ['b_bc16519fb13bc83e6496eb6ec_593f355d7d', '']].forEach(([k, v]) => {
         const inp = document.createElement('input');
         inp.name = k; inp.value = v;
         form.appendChild(inp);
