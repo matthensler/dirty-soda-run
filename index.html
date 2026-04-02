@@ -663,46 +663,37 @@
       const nameParts = name.split(' ');
       const firstName = nameParts[0] || '';
 
-      // Build hidden Mailchimp form and submit into hidden iframe
-      const mcForm = document.createElement('form');
-      mcForm.action = 'https://events.us3.list-manage.com/subscribe/post?u=bc16519fb13bc83e6496eb6ec&id=593f355d7d&f_id=007d25e1f0';
-      mcForm.method = 'POST';
-      mcForm.target = 'mc-hidden-iframe';
-      mcForm.style.display = 'none';
+      // Use XMLHttpRequest to submit to Mailchimp
+      const formData = new FormData();
+      formData.append('EMAIL', email);
+      formData.append('FNAME', firstName);
+      formData.append('b_bc16519fb13bc83e6496eb6ec_593f355d7d', '');
 
-      const emailInput = document.createElement('input');
-      emailInput.name = 'EMAIL';
-      emailInput.value = email;
-      mcForm.appendChild(emailInput);
+      const url = 'https://events.us3.list-manage.com/subscribe/post-json?u=bc16519fb13bc83e6496eb6ec&id=593f355d7d&f_id=007d25e1f0&c=mailchimpCallback';
+      
+      // JSONP approach — the only cross-origin method that works from static HTML
+      window.mailchimpCallback = function(data) {
+        // cleanup
+        const script = document.getElementById('mc-jsonp');
+        if (script) script.remove();
+      };
 
-      const fnameInput = document.createElement('input');
-      fnameInput.name = 'FNAME';
-      fnameInput.value = firstName;
-      mcForm.appendChild(fnameInput);
+      const params = new URLSearchParams({
+        EMAIL: email,
+        FNAME: firstName,
+        'b_bc16519fb13bc83e6496eb6ec_593f355d7d': '',
+        c: 'mailchimpCallback'
+      });
 
-      const honeypot = document.createElement('input');
-      honeypot.name = 'b_bc16519fb13bc83e6496eb6ec_593f355d7d';
-      honeypot.value = '';
-      mcForm.appendChild(honeypot);
+      const script = document.createElement('script');
+      script.id = 'mc-jsonp';
+      script.src = 'https://events.us3.list-manage.com/subscribe/post-json?u=bc16519fb13bc83e6496eb6ec&id=593f355d7d&f_id=007d25e1f0&' + params.toString() + '&c=mailchimpCallback';
+      document.body.appendChild(script);
 
-      document.body.appendChild(mcForm);
-
-      let iframe = document.getElementById('mc-hidden-iframe');
-      if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.name = 'mc-hidden-iframe';
-        iframe.id = 'mc-hidden-iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-      }
-
-      mcForm.submit();
-      document.body.removeChild(mcForm);
-
-      // Show success immediately
+      // Show success screen
       setTimeout(function() {
         document.getElementById('popupForm').style.display = 'none';
         const success = document.getElementById('popupSuccess');
         success.style.display = 'flex';
-      }, 400);
+      }, 500);
     
